@@ -3,7 +3,7 @@
 - **Họ tên:** Nguyen Ho Nam
 - **MSSV:** 2A202602788
 - **Lớp:** K4
-- **Link repo:** https://github.com/NguyenHoNam/NguyenHoNam-2A202602788-Track4-Day21
+- **Link repo:** https://github.com/nghon4maeri/NguyenHoNam-2A202602788-Track4-Day21
 - **Topic:** A — LiDAR-camera projection QA
 - **Dataset:** data/kitti_mini
 - **Các frame đã dùng:** 000011
