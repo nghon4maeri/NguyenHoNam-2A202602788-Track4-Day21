@@ -1,59 +1,56 @@
-# Báo cáo Day 6: [ĐIỀN tên đề tài ngắn]
+# Báo cáo Day 6: LiDAR-Camera Projection QA
 
-> Thay **mọi** ô có chữ ĐIỀN nằm trong ngoặc vuông bằng nội dung của bạn, xoá luôn cả dấu ngoặc vuông. Lệnh `python tools/check_submission.py` sẽ báo FAIL nếu còn sót bất kỳ chỗ nào.
-
-- **Họ tên:** [ĐIỀN]
-- **MSSV:** [ĐIỀN] (phải trùng với MSSV trong tên repo `<HoVaTen>-<MSSV>-Track4-Day21`)
-- **Lớp:** [ĐIỀN]
-- **Link repo:** [ĐIỀN]
-- **Topic:** [ĐIỀN một chữ cái A/B/C/D/E/F] — [ĐIỀN tên topic]
-- **Dataset:** [ĐIỀN một hoặc nhiều trong: data/synthetic, data/kitti_mini, data/nuscenes_mini_subset, log riêng]
-- **Các frame đã dùng:** [ĐIỀN danh sách frame id, ví dụ 000011, 000049 hoặc scene-0103_010]
-
-> Hãy viết ngắn: mỗi mục từ 3 đến 8 dòng, ưu tiên số liệu và hình ảnh.
+- **Họ tên:** Nguyen Ho Nam
+- **MSSV:** 2A202602788
+- **Lớp:** K4
+- **Link repo:** https://github.com/NguyenHoNam/NguyenHoNam-2A202602788-Track4-Day21
+- **Topic:** A — LiDAR-camera projection QA
+- **Dataset:** data/kitti_mini
+- **Các frame đã dùng:** 000011
 
 ## 1. Claim
 
-Một câu khẳng định kỹ thuật có thể kiểm chứng. Ví dụ: *"Lệch yaw 1° làm 12% điểm LiDAR rơi ra khỏi vật thể ở 30 m, phát hiện được bằng edge-alignment score với ngưỡng X."*
-
-[ĐIỀN]
+Lệch yaw 3° làm số lượng điểm LiDAR rơi vào trong 2D bounding box của các vật thể thay đổi từ 1628 điểm lên 1754 điểm (sai lệch gần 8%), gây hiện tượng bóng ma (ghosting) trên hình ảnh overlay và không thể hiện đúng hình dạng thật của vật thể trong không gian.
 
 ## 2. Evidence
 
-Bảng hoặc plot số liệu, kèm ảnh/video demo. Ghi rõ đường dẫn file trong `results/`.
+Kết quả thí nghiệm quét độ lệch góc Yaw từ 0.0 đến 3.0 độ. File log kết quả: `results/yaw_perturb_sweep.csv`.
 
-| Cấu hình / mức perturb | Metric 1 | Metric 2 | Ghi chú |
+| Cấu hình / mức perturb (Yaw deg) | Số điểm trong FOV | Số điểm trong 2D Boxes | Tỷ lệ trong Boxes (%) |
 |---|---|---|---|
-| [ĐIỀN] | | | |
+| 0.0 | 19946 | 1628 | 8.16 |
+| 0.5 | 19946 | 1649 | 8.27 |
+| 1.0 | 19952 | 1656 | 8.30 |
+| 2.0 | 19963 | 1723 | 8.63 |
+| 3.0 | 19948 | 1754 | 8.79 |
 
-![demo](../results/figures/[ĐIỀN].png)
+![demo](../results/figures/demo_000011_yaw_0.0deg.png)
 
 ## 3. Failure case
 
-Nêu khi nào hệ thống hoặc phương pháp fail, vì sao fail, và liên hệ tới lớp nào trong 6 lớp debug: I/O, Geometry, Time, Preprocess, Model, Metric.
+Khi góc Yaw lệch 3 độ, toàn bộ điểm chiếu LiDAR bị trượt hẳn sang mép của vật thể. Trong hình dưới đây, đám mây điểm của chiếc xe hoàn toàn không còn khớp với bbox 2D, khiến dữ liệu bị dóng hàng sai.
 
-![failure](../results/figures/fail_[ĐIỀN].png)
+Lỗi này thuộc lớp **Geometry (Hình học)**: Ma trận ngoại lai (Extrinsic matrix) biểu diễn sai phép quay giữa hệ toạ độ LiDAR và hệ toạ độ Camera, khiến tọa độ 3D bị chiếu lệch xuống mặt phẳng 2D.
 
-[ĐIỀN]
+![failure](../results/figures/fail_000011_yaw_3.0deg.png)
 
 ## 4. Khuyến nghị nếu triển khai thật
 
-Use-case cụ thể (ADAS / robot / drone), trade-off và bước tiếp theo.
-
-[ĐIỀN]
+Trong môi trường xe tự hành (ADAS), cảm biến thường xuyên chịu rung lắc cơ học. Nếu chỉ sử dụng calibration tĩnh từ nhà máy, sau một thời gian dữ liệu sẽ lệch như failure case phía trên, làm nhiễu hệ thống sensor fusion. 
+Khuyến nghị: Cần phát triển thêm một module online calibration (tự động cân chỉnh) để liên tục tính toán và cập nhật lại extrinsic trong thời gian thực.
 
 ## 5. Cách chạy lại
 
 Các lệnh tái tạo lại toàn bộ kết quả từ repo sạch.
 
 ```bash
-[ĐIỀN]
+# Chạy tạo ảnh overlay và file số liệu
+$env:PYTHONIOENCODING="utf-8"
+.\.venv_openpcdet\Scripts\python.exe -m src.topic_a_experiment
 ```
 
 ## 6. Khai báo sử dụng AI
 
-Ghi rõ đã dùng công cụ AI nào, dùng vào việc gì, và bạn đã tự kiểm chứng kết quả đó bằng cách nào. Nếu không dùng AI, ghi "Không sử dụng". Xem quy định ở `RULES.md` mục 2.
-
 | Công cụ | Dùng cho việc gì | Bạn đã kiểm chứng thế nào |
 |---|---|---|
-| [ĐIỀN] | | |
+| Antigravity (Gemini) | Hỗ trợ code projection, xây dựng pipeline đo đạc và phân tích số liệu | Chạy thử nghiệm thành công, xem trực tiếp ảnh kết quả và logic của file Python để xác nhận tính chính xác. |
